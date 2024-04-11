@@ -67,6 +67,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
         svgoOptions: true
       }),
       PurgeIcons(),
+      // viteMockServe
       viteMockServe({
         ignore: /^\_/,
         mockPath: 'mock',

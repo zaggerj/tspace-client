@@ -18,6 +18,12 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
 
+import log from 'electron-log/main'
+
+// Optional, initialize the logger for any renderer process
+log.initialize()
+log.info('Log from the main process')
+
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration()
 
@@ -37,12 +43,18 @@ if (!app.requestSingleInstanceLock()) {
 let win: BrowserWindow | null = null
 // Here, you can also use other preload
 const preload = join(__dirname, '../preload/index.js')
-const url = process.env.VITE_DEV_SERVER_URL
+const url = process.env.VITE_DEV_SERVER_URL || ''
 const indexHtml = join(process.env.DIST, 'index.html')
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: '菜单管理工具',
+    // title: '菜单管理工具',
+    width: 760,
+    height: 480,
+    resizable: false,
+    useContentSize: true,
+    frame: false,
+    transparent: true,
     icon: join(process.env.PUBLIC, 'favicon.ico'),
     webPreferences: {
       preload,
@@ -51,8 +63,7 @@ async function createWindow() {
       // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
       nodeIntegration: true,
       contextIsolation: false
-    },
-    frame: true
+    }
   })
 
   if (process.env.VITE_DEV_SERVER_URL) {
@@ -63,7 +74,7 @@ async function createWindow() {
   } else {
     win.loadFile(indexHtml)
   }
-  win.maximize()
+  // win.maximize()
 
   // Test actively push message to the Electron-Renderer
   win.webContents.on('did-finish-load', () => {
@@ -102,7 +113,7 @@ app.on('activate', () => {
 })
 
 // new window example arg: new windows url
-ipcMain.handle('open-win', (event, arg) => {
+ipcMain.handle('open-win', (_, arg) => {
   const childWindow = new BrowserWindow({
     webPreferences: {
       preload,
